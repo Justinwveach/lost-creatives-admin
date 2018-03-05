@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import LoaderButton from "../components/LoaderButton";
 import config from "../config";
+import ImageSize from "../enums/ImageSize";
+import ImageSet from "../models/ImageSet";
 import "./NewBlog.css";
 import { invokeApig, s3Upload, s3UploadBlogImage, s3UploadBlogJpegBlob } from "../libs/awsLib";
 import readAndCompressImage from 'browser-image-resizer';
@@ -49,36 +51,50 @@ export default class NewBlog extends Component {
       //const uploadedFilename = this.file
       //  ? (await s3Upload(this.file)).Location : null;
 
-      var fileNames = [];
+      var imageSets = [];
       for (var file of this.files) {
-        const uploadedFilename = file
-          ? (await s3UploadBlogImage(file, "lg")).Location : null;
-          fileNames.push(uploadedFilename);
+        //const uploadedFilename = file
+        //  ? (await s3UploadBlogImage(file, "lg")).Location : null;
+        //  fileNames.push(uploadedFilename);
 
         //const smallImage = await this.resizeImage(file, config.smImageConfig);
         //smallImage.name = file.name;
         //smallImage.type = file.type;
         //smallImage.lastModifiedDate = new Date();
 
-        const resizedFile = await readAndCompressImage(file, config.smImageConfig).then(resizedImage =>{
-          return new File([resizedImage], file.name, {type: "image/jpeg", lastModified: Date.now()});
+        const smallImage = await readAndCompressImage(file, config.smImageConfig).then(resizedImage =>{
+          return this.blobToFile(resizedImage, file.name);
+        });
+        const mediumImage = await readAndCompressImage(file, config.mdImageConfig).then(resizedImage =>{
+          return this.blobToFile(resizedImage, file.name);
+        });
+        const largeImage = await readAndCompressImage(file, config.lgImageConfig).then(resizedImage =>{
+          return this.blobToFile(resizedImage, file.name);
         });
 
-        const smallFilename = resizedFile ? (await s3UploadBlogImage(resizedFile, "sm")).Location : null;
+        const smallFileLink = smallImage ? (await s3UploadBlogImage(smallImage, ImageSize.SMALL)).Location : null;
+        const mediumFileLink = mediumImage ? (await s3UploadBlogImage(mediumImage, ImageSize.MEDIUM)).Location : null;
+        const largeFileLink = smallImage ? (await s3UploadBlogImage(largeImage, ImageSize.LARGE)).Location : null;
 
+        const imageSet = new ImageSet(smallFileLink, mediumFileLink, largeFileLink);
+        imageSets.push(imageSet);
       }
 
+      // Add a blog entry
       const blog = await this.createBlog({
         title: this.state.title,
         subtitle: this.state.subtitle,
         content: this.state.content
       });
 
+      // After we have uploaded the blog, add an image entry that maps the images to the blog
       if (blog !== null) {
-        for (var fileUrl of fileNames) {
+        for (var imageSet of imageSets) {
           await this.addImage({
             blogId: blog.blogId,
-            image: fileUrl
+            smallImage: imageSet.small,
+            mediumImage: imageSet.medium,
+            largeImage: imageSet.large
           })
         }
       }
@@ -90,13 +106,8 @@ export default class NewBlog extends Component {
     }
   }
 
-  async resizeImage(file, imageConfig) {
-    readAndCompressImage(file, imageConfig).then(resizedImage =>{
-    console.log(resizedImage);
-    var resizedFile = new File([resizedImage], file.name, {type: "image/jpeg", lastModified: Date.now()});
-    console.log(resizedFile);
-    return resizedFile;
-  });
+  blobToFile(blob, name) {
+    return new File([blob], name, {type: "image/jpeg", lastModified: Date.now()});
   }
 
   createBlog(blog) {
@@ -157,7 +168,7 @@ export default class NewBlog extends Component {
 
           <FormGroup controlId="file">
             <ControlLabel>{config.MAX_ATTACHMENT_SIZE}</ControlLabel>
-            <FormControl onChange={this.handleFileChange} type="file" multiple />
+            <FormControl onChange={this.handleFileChange} type="file" multiple accept="image/*" />
           </FormGroup>
           <LoaderButton
             block
