@@ -85,8 +85,9 @@ export async function s3UploadBlogJpegBlob(file, filename, prefix) {
   return s3Upload(file, newFilename, "image/jpeg");
 }
 
-export async function s3UploadBlogImage(file, prefix) {
-  const filename = `${file.name}/${prefix}-${file.name}`;
+export async function s3UploadBlogImage(file, prefix, date) {
+  const fileName = file.name.substring(0, file.name.lastIndexOf("."));
+  const filename = `${fileName}-${date}/${prefix}-${file.name}`;
   return s3Upload(file, filename, file.type);
 }
 
