@@ -5,7 +5,7 @@ import { invokeApig, s3Upload } from "../libs/awsLib";
 import config from "../config";
 import "./NewCategory.css";
 
-export default class NewCategory extends Component {
+export default class Category extends Component {
 
   constructor(props) {
     super(props);

@@ -6,6 +6,8 @@ import Categories from "./containers/Categories";
 import NotFound from "./containers/NotFound";
 import AppliedRoute from "./components/AppliedRoute";
 import NewBlog from "./containers/NewBlog";
+import Blog from "./containers/Blog";
+import Blogs from "./containers/Blogs";
 import NewCategory from "./containers/NewCategory";
 import Category from "./containers/Category";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
@@ -15,9 +17,14 @@ export default ({ childProps }) =>
   <Switch>
     <Route path="/" exact component={Home} />
     <UnauthenticatedRoute path="/login" exact component={Login} props={childProps} />
+
     <AuthenticatedRoute path="/categories" exact component={Categories} props={childProps} />
     <AuthenticatedRoute path="/categories/new" exact component={NewCategory} props={childProps} />
     <AuthenticatedRoute path="/categories/:id" exact component={Category} props={childProps} />
+
+    <AuthenticatedRoute path="/blogs" exact component={Blogs} props={childProps} />
     <AuthenticatedRoute path="/blogs/new" exact component={NewBlog} props={childProps} />
+    <AuthenticatedRoute path="/blogs/:id" exact component={Blog} props={childProps} />
+
     <Route component={NotFound} />
   </Switch>;

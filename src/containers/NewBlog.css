@@ -2,7 +2,7 @@
   padding-bottom: 15px;
 }
 
-.NewBlog form textarea {
-  height: 300px;
+.NewBlog textarea {
+  height:400px;
   font-size: 24px;
 }
