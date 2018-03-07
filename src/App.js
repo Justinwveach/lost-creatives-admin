@@ -52,14 +52,22 @@ class App extends Component {
         <Navbar fluid collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>
-              <Link to="/">Scratch</Link>
+              <Link to="/">Lost</Link>
             </Navbar.Brand>
             <Navbar.Toggle />
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullRight>
               {this.state.isAuthenticated
-                ? <NavItem onClick={this.handleLogout}>Logout</NavItem>
+                ? [
+                    <NavItem key={1} onClick={this.handleLogout}>Logout</NavItem>,
+                    <NavItem key={2} href="/blogs">
+                      Blogs
+                    </NavItem>,
+                    <NavItem key={3} href="/categories">
+                      Categories
+                    </NavItem>
+                  ]
                 : [
                     <RouteNavItem key={1} href="/login">
                       Login

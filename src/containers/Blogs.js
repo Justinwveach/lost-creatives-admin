@@ -43,6 +43,7 @@ export default class Blogs extends Component {
               onClick={this.handleCategoryClick}
               header={blog.title.trim().split("\n")[0]}
             >
+              <b>{blog.subtitle}</b><br/><br/>
               {"Created: " + new Date(blog.createdAt).toLocaleString()}
             </ListGroupItem>
           : <ListGroupItem
