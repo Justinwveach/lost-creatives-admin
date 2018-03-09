@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Button, Glyphicon } from "react-bootstrap";
 import "./CategoryDropdown.css";
 import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
+import config from "../config";
 
 export default class CategoryDropdown extends Component {
 
@@ -12,7 +13,7 @@ export default class CategoryDropdown extends Component {
   }
 
   componentDidMount() {
-    fetch("https://eafalsk4f4.execute-api.us-east-1.amazonaws.com/prod/categories",
+    fetch(`${config.apiGateway.URL}/categories`,
     {
       method: "get",
       headers: {
@@ -57,7 +58,7 @@ export default class CategoryDropdown extends Component {
             {
               this.state.categories.map(function(category, i) {
               return (
-                  <option key={i} value={category.content}>{category.content}</option>
+                  <option key={i} value={category.name}>{category.name}</option>
                 );
               })
             }

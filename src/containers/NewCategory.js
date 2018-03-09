@@ -12,15 +12,16 @@ export default class NewCategory extends Component {
 
     this.state = {
       isLoading: null,
-      content: ""
+      name: ""
     };
   }
 
   validateForm() {
-    return this.state.content.length > 0;
+    return this.state.name.length > 0;
   }
 
   createCategory(category) {
+    console.log("gateway: " + config.apiGateway.URL);
     return invokeApig({
       path: "/categories",
       method: "POST",
@@ -43,7 +44,7 @@ export default class NewCategory extends Component {
     try {
 
       await this.createCategory({
-        content: this.state.content
+        name: this.state.name
       });
       this.props.history.push("/categories");
     } catch (e) {
@@ -56,11 +57,11 @@ export default class NewCategory extends Component {
     return (
       <div className="NewCategory">
         <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="content">
+          <FormGroup controlId="name">
             <ControlLabel>Category Name</ControlLabel>
             <FormControl
               onChange={this.handleChange}
-              value={this.state.content}
+              value={this.state.name}
               componentClass="input"
             />
           </FormGroup>

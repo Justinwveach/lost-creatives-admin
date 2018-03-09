@@ -16,9 +16,18 @@
     "react-scripts": "1.1.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "REACT_APP_STAGE=dev react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
+
+    "predeploy": "REACT_APP_STAGE=dev npm run build",
+    "deploy": "aws s3 sync build/ s3://lost-creatives-admin-dev",
+    "postdeploy": "aws cloudfront create-invalidation --distribution-id E2WQW1I5VNR79Y --paths '/*'",
+
+    "predeploy:prod": "REACT_APP_STAGE=production npm run build",
+    "deploy:prod": "aws s3 sync build/ s3://lost-creatives-admin",
+    "postdeploy:prod": "aws cloudfront create-invalidation --distribution-id E1PCMU9FXM8DAJ --paths '/*'",
+
     "eject": "react-scripts eject"
   }
 }

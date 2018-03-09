@@ -41,7 +41,7 @@ export default class Categories extends Component {
               key={category.categoryId}
               href={`/categories/${category.categoryId}`}
               onClick={this.handleCategoryClick}
-              header={category.content.trim().split("\n")[0]}
+              header={category.name.trim().split("\n")[0]}
             >
               {"Created: " + new Date(category.createdAt).toLocaleString()}
             </ListGroupItem>

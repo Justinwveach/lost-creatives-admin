@@ -1,6 +1,6 @@
 export default class ImageSet {
 
-  constructor(small, medium, large) {
+  constructor(small, medium, large, isMainImage) {
     this.small = small;
     this.medium = medium;
     this.large = large;

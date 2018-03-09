@@ -14,21 +14,21 @@ export default class Category extends Component {
       isLoading: null,
       isDeleting: null,
       category: null,
-      content: ""
+      name: ""
     };
   }
 
   async componentDidMount() {
     try {
       const results = await this.getCategory();
-      this.setState({ category: results, content: results.content });
+      this.setState({ category: results, name: results.name });
     } catch (e) {
       alert(e);
     }
   }
 
   validateForm() {
-    return this.state.content.length > 0;
+    return this.state.name.length > 0;
   }
 
   handleChange = event => {
@@ -45,7 +45,7 @@ export default class Category extends Component {
     try {
       await this.saveCategory({
         ...this.state.category,
-        content: this.state.content
+        name: this.state.name
       });
       this.props.history.push("/categories");
     } catch (e) {
@@ -99,10 +99,10 @@ export default class Category extends Component {
         <PageHeader>Category</PageHeader>
         {this.state.category &&
           <form onSubmit={this.handleSubmit}>
-            <FormGroup controlId="content">
+            <FormGroup controlId="name">
               <FormControl
                 onChange={this.handleChange}
-                value={this.state.content}
+                value={this.state.name}
                 componentClass="input"
               />
             </FormGroup>

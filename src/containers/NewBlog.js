@@ -14,6 +14,7 @@ export default class NewBlog extends Component {
     super(props);
 
     this.files = null;
+    this.mainImage = null;
 
     this.state = {
       isLoading: null,
@@ -52,6 +53,10 @@ export default class NewBlog extends Component {
     //this.file = event.target.files[0];
   }
 
+  handleMainImageChange = event => {
+    this.mainImage = event.target.files[0];
+  }
+
   handleSubmit = async event => {
     event.preventDefault();
 
@@ -69,35 +74,16 @@ export default class NewBlog extends Component {
       var imageSets = [];
       const date = Date.now();
 
+      const mainImageSet = await this.createAndUploadImageSet(this.mainImage, true, date);
+
+      var blogImageSet = [];
       for (var file of this.files) {
-        //const uploadedFilename = file
-        //  ? (await s3UploadBlogImage(file, "lg")).Location : null;
-        //  fileNames.push(uploadedFilename);
-
-        //const smallImage = await this.resizeImage(file, config.smImageConfig);
-        //smallImage.name = file.name;
-        //smallImage.type = file.type;
-        //smallImage.lastModifiedDate = new Date();
-
-        const smallImage = await readAndCompressImage(file, config.smImageConfig).then(resizedImage =>{
-          return this.blobToFile(resizedImage, file.name);
-        });
-        const mediumImage = await readAndCompressImage(file, config.mdImageConfig).then(resizedImage =>{
-          return this.blobToFile(resizedImage, file.name);
-        });
-        const largeImage = await readAndCompressImage(file, config.lgImageConfig).then(resizedImage =>{
-          return this.blobToFile(resizedImage, file.name);
-        });
-
-        const smallFileLink = smallImage ? (await s3UploadBlogImage(smallImage, ImageSize.SMALL, date)).Location : null;
-        const mediumFileLink = mediumImage ? (await s3UploadBlogImage(mediumImage, ImageSize.MEDIUM, date)).Location : null;
-        const largeFileLink = smallImage ? (await s3UploadBlogImage(largeImage, ImageSize.LARGE, date)).Location : null;
-
-        const imageSet = new ImageSet(smallFileLink, mediumFileLink, largeFileLink);
-        imageSets.push(imageSet);
+        const imageSet = await this.createAndUploadImageSet(file, false, date);
+        blogImageSet.push(imageSet);
       }
 
       // Add a blog entry
+
       const blog = await this.createBlog({
         title: this.state.title,
         subtitle: this.state.subtitle,
@@ -107,7 +93,9 @@ export default class NewBlog extends Component {
         country: this.state.country,
         latitude: this.state.latitude,
         longitude: this.state.longitude,
-        category: this.state.category
+        category: this.state.category,
+        images: blogImageSet,
+        mainImage: mainImageSet
       });
 
       // After we have uploaded the blog, add an image entry that maps the images to the blog
@@ -117,16 +105,36 @@ export default class NewBlog extends Component {
             blogId: blog.blogId,
             smallImage: imageSet.small,
             mediumImage: imageSet.medium,
-            largeImage: imageSet.large
+            largeImage: imageSet.large,
+            isMainImage: imageSet.isMainImage
           })
         }
       }
 
-      this.props.history.push("/");
+      this.props.history.push("/blogs");
     } catch (e) {
       alert(e);
       this.setState({ isLoading: false });
     }
+  }
+
+  async createAndUploadImageSet(file, isMainImage, date) {
+    const smallImage = await readAndCompressImage(file, config.smImageConfig).then(resizedImage =>{
+      return this.blobToFile(resizedImage, file.name);
+    });
+    const mediumImage = await readAndCompressImage(file, config.mdImageConfig).then(resizedImage =>{
+      return this.blobToFile(resizedImage, file.name);
+    });
+    const largeImage = await readAndCompressImage(file, config.lgImageConfig).then(resizedImage =>{
+      return this.blobToFile(resizedImage, file.name);
+    });
+
+    const smallFileLink = smallImage ? (await s3UploadBlogImage(smallImage, ImageSize.SMALL, date)).Location : null;
+    const mediumFileLink = mediumImage ? (await s3UploadBlogImage(mediumImage, ImageSize.MEDIUM, date)).Location : null;
+    const largeFileLink = smallImage ? (await s3UploadBlogImage(largeImage, ImageSize.LARGE, date)).Location : null;
+
+    const imageSet = new ImageSet(smallFileLink, mediumFileLink, largeFileLink, isMainImage);
+    return imageSet;
   }
 
   blobToFile(blob, name) {
@@ -149,17 +157,6 @@ export default class NewBlog extends Component {
     });
   }
 
-/*
-  category: data.category,
-        city: data.city,
-        state: data.state,
-        country: data.country,
-        title: data.title,
-        subtitle: data.subtitle,
-        content: data.content,
-        latitude: data.latitude,
-        longitude: data.longitude
-        */
   render() {
     return (
       <div className="NewBlog">
@@ -241,6 +238,11 @@ export default class NewBlog extends Component {
               value={this.state.content}
               componentClass="textarea"
             />
+          </FormGroup>
+
+          <FormGroup controlId="mainImage">
+            <ControlLabel>Main Image - Will be used on cards and header so make it good.</ControlLabel>
+            <FormControl onChange={this.handleMainImageChange} type="file" accept="image/*" />
           </FormGroup>
 
           <FormGroup controlId="file">
